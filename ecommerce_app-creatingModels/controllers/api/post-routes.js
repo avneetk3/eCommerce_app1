@@ -4,29 +4,25 @@ const { Users, Posts, Comments, Categories } = require('../../models');
 
 // The `/api/posts` endpoint
 
-// get all users
+// get all posts
 router.get('/', (req, res) => {
   console.log('get all posts');
   Posts.findAll({
-    attributes: [
-      'id',
-      'title',
-      'description'
-    ],
-    include: [
+       attributes: ['id','title', 'description']
+   /* include: [
       {
         model: Comments,
-        attributes: ['id', 'title', 'description', 'creator_id'],
+        attributes: ['id', 'comment_text', 'user_id', 'post_id'],
         include: {
           model: Users,
           attributes: ['id']
         }
       },
       {
-        model: Users,
-        attributes: ['username']
+        model: Categories,
+        attributes: ['category_name']
       }
-    ]
+    ]*/
   })
     .then(dbPostData => res.json(dbPostData))
     .catch(err => {

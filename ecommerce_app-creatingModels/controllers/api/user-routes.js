@@ -23,20 +23,20 @@ router.get('/:id', (req, res) => {
     where: {
       id: req.params.id
     },
-    include: [
-      {
+    /*include: [
+     /* {
         model: Posts,
         attributes: ['id', 'title', 'description']
       },
       {
         model: Comments,
         attributes: ['id', 'comment_text'],
-        include: {
+          include: {
           model: Posts,
           attributes: ['title']
         }
       }
-    ]
+    ]*/
   })
     .then(dbUserData => {
       if (!dbUserData) {
@@ -75,9 +75,9 @@ router.post('/', (req, res) => {
 });
 
 //find users based on email id 
+// expects {email: 'savvy@gmail.com', password: 'password1234'}
 router.post('/login', (req, res) => {
-  // expects {email: 'savvy@gmail.com', password: 'password1234'}
-  Users.findOne({
+  User.findOne({
     where: {
       email: req.body.email
     }
