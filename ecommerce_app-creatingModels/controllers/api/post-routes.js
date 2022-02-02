@@ -1,29 +1,33 @@
 const router = require('express').Router();
 const sequelize = require('../../config/connection');
-const { Users, Posts, Comments, Categories } = require('../../models');
+const { User, Post, Comment, Category } = require('../../models');
 
 // The `/api/posts` endpoint
 
 // get all posts
 router.get('/', (req, res) => {
   console.log('get all posts');
-  Posts.findAll({
-       attributes: ['id','title', 'description']
-   /* include: [
+  Post.findAll({
+      // attributes: ['id','title', 'description']
+    include: [
       {
-        model: Comments,
+        model: Comment,
         attributes: ['id', 'comment_text', 'user_id', 'post_id'],
         include: {
-          model: Users,
+          model: User,
           attributes: ['id']
         }
       },
       {
-        model: Categories,
+        model: User,
+        attributes: ['username']
+      },
+      {
+        model: Category,
         attributes: ['category_name']
       }
-    ]*/
-  })
+    ]}
+  )
     .then(dbPostData => res.json(dbPostData))
     .catch(err => {
       console.log(err);
@@ -33,27 +37,32 @@ router.get('/', (req, res) => {
 
 //Get posts by id
 router.get('/:id', (req, res) => {
-  Posts.findOne({
+  Post.findOne({
     where: {
       id: req.params.id
     },
     attributes: [
       'id',
-      'tilte',
-      'description'
+      'title',
+      'description','creator_id','category_id'
     ],
     include: [
       {
         model: Comment,
-        attributes: ['id', 'title', 'description', 'creator_id'],
+        attributes: ['id', 'comment_text', 'user_id'],
         include: {
-          model: Users,
+          model: User,
           attributes: ['id']
         }
       },
       {
-        model: Users,
+        model: User,
         attributes: ['username']
+      },
+      {
+        model: Category,
+        attributes:['category_name'],
+
       }
     ]
   })
@@ -73,11 +82,12 @@ router.get('/:id', (req, res) => {
 
 //Create new post 
   // expects {title: 'Taskmaster goes public!', description: 'https://taskmaster.com/press', category_id: 1}
-router.post( (req, res) => {
-  Posts.create({
+router.post( '/',(req, res) => {
+  Post.create({
     title: req.body.title,
     description: req.body.description,
-    creator_id: req.session.user_id,
+   // creator_id: req.session.user_id, will be using this later when sessions are added 
+   creator_id: req.body.creator_id,  //remove this when sessions are added and replace with code at line 89 creator_id: req.session.user_id
     category_id : req.body.category_id
   })
     .then(dbPostData => res.json(dbPostData))
@@ -90,7 +100,7 @@ router.post( (req, res) => {
 
 //Update posts
 router.put('/:id',(req, res) => {
-  Posts.update(
+  Post.update(
     {
       title: req.body.title
     },
@@ -117,7 +127,7 @@ router.put('/:id',(req, res) => {
 //Delete posts based on post id
 router.delete('/:id', (req, res) => {
   console.log('id', req.params.id);
-  Posts.destroy({
+  Post.destroy({
     where: {
       id: req.params.id
     }
